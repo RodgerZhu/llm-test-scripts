@@ -8,7 +8,8 @@ from tabulate import tabulate
 # 配置参数
 TARGET_FIELDS = [
     "max_concurrency", "total_token_throughput",
-    "output_throughput", "mean_ttft_ms", "mean_tpot_ms", "median_tpot_ms", "mean_itl_ms", "input_len", "output_len"
+    "output_throughput", "mean_ttft_ms", "mean_tpot_ms", 
+    "median_tpot_ms", "mean_itl_ms", "input_len", "output_len"
 ]
 TABLE_FORMAT = "grid"
 
