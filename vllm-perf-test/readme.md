@@ -3,7 +3,7 @@ How to:
 
 ```
 cd vllm/benchmarks
-./run_vllm_benchmark_serving.sh
+ ./run_vllm_benchmark_serving.sh --result-dir /custom/path
 ```
 
 2. Parse the test data:
