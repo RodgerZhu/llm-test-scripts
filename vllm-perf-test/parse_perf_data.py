@@ -8,8 +8,7 @@ from tabulate import tabulate
 # 配置参数
 TARGET_FIELDS = [
     "max_concurrency", "total_token_throughput",
-    "output_throughput", "mean_ttft_ms", "mean_tpot_ms", 
-    "median_tpot_ms", "mean_itl_ms", "input_len", "output_len"
+    "output_throughput", "mean_ttft_ms", "mean_tpot_ms", "median_tpot_ms", "mean_itl_ms", "num_prompts","input_len", "output_len"
 ]
 TABLE_FORMAT = "grid"
 
@@ -18,18 +17,23 @@ def parse_filename(filename):
     filename_without_ext = os.path.splitext(filename)[0]
     parts = filename_without_ext.split('-')
 
-    input_len, output_len = "N/A", "N/A"
+    num_prompts, input_len, output_len = "N/A", "N/A", "N/A"
     if len(parts) >= 1:
         try:
-            input_len = int(parts[0])
+            num_prompts = int(parts[0])
         except ValueError:
             pass
     if len(parts) >= 2:
         try:
-            output_len = int(parts[1])
+            input_len = int(parts[1])
         except ValueError:
             pass
-    return input_len, output_len
+    if len(parts) >= 3:
+        try:
+            output_len = int(parts[2])
+        except ValueError:
+            pass
+    return num_prompts,input_len, output_len
 
 def format_value(value):
     """数值格式化"""
@@ -41,12 +45,13 @@ def process_file(filepath):
     """处理单个JSON文件"""
     try:
         filename = os.path.basename(filepath)
-        input_len, output_len = parse_filename(filename)
+        num_prompts, input_len, output_len = parse_filename(filename)
         with open(filepath, 'r') as f:
             data = json.load(f)
 
         processed_data = {
-            **{k: format_value(data.get(k, "N/A")) for k in TARGET_FIELDS if k not in ["input_len", "output_len"]},
+            **{k: format_value(data.get(k, "N/A")) for k in TARGET_FIELDS if k not in ["num_prompts", "input_len", "output_len"]},
+            "num_prompts": num_prompts,
             "input_len": input_len,
             "output_len": output_len
         }
@@ -59,7 +64,9 @@ def generate_table(data):
     """生成文本表格"""
     headers = []
     for field in TARGET_FIELDS:
-        if field == "input_len":
+        if field == "num_prompts":
+            headers.append("num_prompts")
+        elif field == "input_len":
             headers.append("Input (m)")
         elif field == "output_len":
             headers.append("Output (m)")
@@ -91,7 +98,7 @@ def save_to_csv(data, filename):
         csv_headers = [
             "Max Concurrency", "Total Token Throughput",
             "Output Throughput", "Mean TTFT (ms)",
-            "Mean TPOT (ms)", "Median TPOT (ms)","mean_itl_ms","input_len", "output_len"
+            "Mean TPOT (ms)", "Median TPOT (ms)","mean_itl_ms","num_prompts","input_len", "output_len"
         ]
 
         with open(filename, 'w', newline='') as f:
